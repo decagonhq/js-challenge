@@ -1,4 +1,35 @@
-const { getTrips, getDriver } = require('api');
+const { getTrips, getDriver, getVehicle } = require('api');
+
+/**
+ * fetches all driver for the trips
+ */
+async function getAllDrivers(trips) {
+  const _drivers = [];
+  const _driverGetters = [];
+  trips.forEach((trip) => {
+    if (!_drivers.includes(trip.driverID)) {
+      _driverGetters.push(getDriver(trip.driverID));
+      _drivers.push(trip.driverID);
+    }
+  });
+
+  try {
+    let drivers = await Promise.all(
+      _driverGetters.map((p) => p.catch((e) => e)),
+    );
+    drivers = drivers
+      .filter((d) => !(d instanceof Error))
+      .map((driver, i) => {
+        driver['id'] = _drivers[i];
+        return driver;
+      });
+
+    return drivers;
+  } catch (error) {
+    console.log(error.data);
+    return [];
+  }
+}
 
 /**
  * This function should return the trip data analysis
@@ -32,12 +63,14 @@ async function analysis() {
     },
   };
   const drivers = {};
-  const vehicles = [];
   try {
     const trips = await getTrips();
 
-    await trips.reduce(async (acc, curr) => {
-      const _acc = await acc;
+    const allDrivers = await getAllDrivers(trips);
+
+    console.log(allDrivers);
+
+    trips.reduce((_acc, curr) => {
       const { driverID, isCash, billedAmount } = curr;
       const _nBilledAmount =
         typeof billedAmount == 'string'
@@ -52,7 +85,7 @@ async function analysis() {
         _acc.nonCashBilledTotal += _nBilledAmount;
       }
       try {
-        const driver = await getDriver(driverID);
+        const driver = allDrivers.find((d) => d.id === driverID);
         if (driverID in drivers) {
           drivers[driverID].noOfTrips++;
           drivers[driverID].totalAmountEarned += _nBilledAmount;
@@ -83,7 +116,7 @@ async function analysis() {
       } catch (error) {}
 
       return _acc;
-    }, Promise.resolve(result));
+    }, result);
     result.billedTotal = Number(result.billedTotal.toFixed(2));
     result.nonCashBilledTotal = Number(result.nonCashBilledTotal.toFixed(2));
 
