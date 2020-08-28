@@ -55,49 +55,41 @@ async function analysis() {
         const driver = await getDriver(driverID);
         if (driverID in drivers) {
           drivers[driverID].noOfTrips++;
-          if (driver) {
-            if (vehicles.includes(driver.vehicleID)) {
-              _acc.noOfDriversWithMoreThanOneVehicle++;
-            } else {
-              vehicles.push(driver.vehicleID);
-            }
-          }
           drivers[driverID].totalAmountEarned += _nBilledAmount;
 
           if (_acc.mostTripsByDriver.noOfTrips < drivers[driverID].noOfTrips) {
             _acc.mostTripsByDriver = drivers[driverID];
           }
-        } else {
-          if (driver) {
-            drivers[driverID] = {
-              email: driver.email,
-              name: driver.name,
-              phone: driver.phone,
-              noOfTrips: 1,
-              totalAmountEarned: _nBilledAmount,
-            };
+        } else if (driver) {
+          if (driver.vehicleID.length > 1) {
+            _acc.noOfDriversWithMoreThanOneVehicle++;
+          }
+          drivers[driverID] = {
+            name: driver.name,
+            email: driver.email,
+            phone: driver.phone,
+            noOfTrips: 1,
+            totalAmountEarned: _nBilledAmount,
+          };
+        }
+        if (driver) {
+          if (
+            _acc.highestEarningDriver.totalAmountEarned <
+            drivers[driverID].totalAmountEarned
+          ) {
+            _acc.highestEarningDriver = drivers[driverID];
           }
         }
-      } catch (error) {
-        console.log(error);
-      }
+      } catch (error) {}
 
-      if (drivers[driverID]) {
-        if (
-          _acc.highestEarningDriver.totalAmountEarned <
-          drivers[driverID].totalAmountEarned
-        ) {
-          _acc.highestEarningDriver = drivers[driverID];
-        }
-      }
       return _acc;
     }, Promise.resolve(result));
     result.billedTotal = Number(result.billedTotal.toFixed(2));
     result.nonCashBilledTotal = Number(result.nonCashBilledTotal.toFixed(2));
+
+    console.log(result);
     return result;
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 }
 
 module.exports = analysis;
