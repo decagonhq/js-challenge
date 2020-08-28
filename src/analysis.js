@@ -57,7 +57,7 @@ async function analysis() {
           drivers[driverID].noOfTrips++;
           drivers[driverID].totalAmountEarned += _nBilledAmount;
 
-          if (_acc.mostTripsByDriver.noOfTrips < drivers[driverID].noOfTrips) {
+          if (_acc.mostTripsByDriver.noOfTrips <= drivers[driverID].noOfTrips) {
             _acc.mostTripsByDriver = drivers[driverID];
           }
         } else if (driver) {
