@@ -1,34 +1,5 @@
-const { getTrips, getDriver, getVehicle } = require('api');
-
-/**
- * fetches all driver for the trips
- */
-async function getAllDrivers(trips) {
-  const _drivers = [];
-  const _driverGetters = [];
-  trips.forEach((trip) => {
-    if (!_drivers.includes(trip.driverID)) {
-      _driverGetters.push(getDriver(trip.driverID));
-      _drivers.push(trip.driverID);
-    }
-  });
-
-  try {
-    let drivers = await Promise.all(
-      _driverGetters.map((p) => p.catch((e) => e)),
-    );
-    drivers = drivers
-      .filter((d) => !(d instanceof Error))
-      .map((driver, i) => {
-        driver['id'] = _drivers[i];
-        return driver;
-      });
-
-    return drivers;
-  } catch (error) {
-    return [];
-  }
-}
+const { getTrips } = require('api');
+const { getAllDrivers } = require('./utils');
 
 /**
  * This function should return the trip data analysis
@@ -67,19 +38,21 @@ async function analysis() {
 
     const allDrivers = await getAllDrivers(trips);
 
-    trips.reduce((_acc, curr) => {
+    trips.reduce((acc, curr) => {
       const { driverID, isCash, billedAmount } = curr;
+
+      // parse the billedAmount
       const _nBilledAmount =
         typeof billedAmount == 'string'
           ? Number.parseFloat(billedAmount.replace(/,/g, ''))
           : billedAmount;
-      _acc.billedTotal += _nBilledAmount;
+      acc.billedTotal += _nBilledAmount;
       if (isCash) {
-        _acc.noOfCashTrips++;
-        _acc.cashBilledTotal += _nBilledAmount;
+        acc.noOfCashTrips++;
+        acc.cashBilledTotal += _nBilledAmount;
       } else {
-        _acc.noOfNonCashTrips++;
-        _acc.nonCashBilledTotal += _nBilledAmount;
+        acc.noOfNonCashTrips++;
+        acc.nonCashBilledTotal += _nBilledAmount;
       }
       try {
         const driver = allDrivers.find((d) => d.id === driverID);
@@ -87,12 +60,12 @@ async function analysis() {
           drivers[driverID].noOfTrips++;
           drivers[driverID].totalAmountEarned += _nBilledAmount;
 
-          if (_acc.mostTripsByDriver.noOfTrips <= drivers[driverID].noOfTrips) {
-            _acc.mostTripsByDriver = drivers[driverID];
+          if (acc.mostTripsByDriver.noOfTrips <= drivers[driverID].noOfTrips) {
+            acc.mostTripsByDriver = drivers[driverID];
           }
         } else if (driver) {
           if (driver.vehicleID.length > 1) {
-            _acc.noOfDriversWithMoreThanOneVehicle++;
+            acc.noOfDriversWithMoreThanOneVehicle++;
           }
           drivers[driverID] = {
             name: driver.name,
@@ -104,15 +77,15 @@ async function analysis() {
         }
         if (driver) {
           if (
-            _acc.highestEarningDriver.totalAmountEarned <
+            acc.highestEarningDriver.totalAmountEarned <
             drivers[driverID].totalAmountEarned
           ) {
-            _acc.highestEarningDriver = drivers[driverID];
+            acc.highestEarningDriver = drivers[driverID];
           }
         }
       } catch (error) {}
 
-      return _acc;
+      return acc;
     }, result);
     result.billedTotal = Number(result.billedTotal.toFixed(2));
     result.nonCashBilledTotal = Number(result.nonCashBilledTotal.toFixed(2));
