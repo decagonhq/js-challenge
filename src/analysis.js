@@ -26,7 +26,6 @@ async function getAllDrivers(trips) {
 
     return drivers;
   } catch (error) {
-    console.log(error.data);
     return [];
   }
 }
@@ -67,8 +66,6 @@ async function analysis() {
     const trips = await getTrips();
 
     const allDrivers = await getAllDrivers(trips);
-
-    console.log(allDrivers);
 
     trips.reduce((_acc, curr) => {
       const { driverID, isCash, billedAmount } = curr;
@@ -120,7 +117,6 @@ async function analysis() {
     result.billedTotal = Number(result.billedTotal.toFixed(2));
     result.nonCashBilledTotal = Number(result.nonCashBilledTotal.toFixed(2));
 
-    console.log(result);
     return result;
   } catch (error) {}
 }
