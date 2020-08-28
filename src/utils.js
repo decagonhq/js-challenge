@@ -18,16 +18,16 @@ async function getAllDrivers(trips) {
       await Promise.all(
         _drivers
           .map((ID) => getDriver(ID))
-          .map((promise) => promise.catch((e) => e)),
+          .map((promise) => promise.catch(() => null)),
       )
     )
       .map((driver, i) => {
-        if (!(driver instanceof Error)) {
+        if (driver !== null) {
           driver['id'] = _drivers[i];
         }
         return driver;
       })
-      .filter((d) => !(d instanceof Error));
+      .filter((driver) => driver !== null);
 
     return drivers;
   } catch (error) {
@@ -50,16 +50,17 @@ async function getAllVehicles(drivers) {
       await Promise.all(
         _vehicles
           .map((ID) => getVehicle(ID))
-          .map((promise) => promise.catch((e) => e)),
+          .map((promise) => promise.catch(() => null)),
       )
     )
       .map((vehicle, i) => {
-        if (!(v instanceof Error)) {
+        if (vehicle !== null) {
           vehicle['id'] = _vehicles[i];
+          vehicle['driverID'] = drivers[i].id;
         }
         return vehicle;
       })
-      .filter((v) => !(v instanceof Error));
+      .filter((vehicle) => vehicle !== null);
 
     return vehicles;
   } catch (error) {
@@ -67,4 +68,10 @@ async function getAllVehicles(drivers) {
   }
 }
 
-module.exports = { getAllDrivers, getAllVehicles };
+function toDouble(value) {
+  return typeof value == 'string'
+    ? Number.parseFloat(value.replace(/,/g, ''))
+    : value;
+}
+
+module.exports = { getAllDrivers, getAllVehicles, toDouble };
