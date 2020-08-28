@@ -1,5 +1,5 @@
 const { getTrips } = require('api');
-const { getAllDrivers } = require('./utils');
+const { getAllDrivers, toDouble } = require('./utils');
 
 /**
  * This function should return the trip data analysis
@@ -42,10 +42,7 @@ async function analysis() {
       const { driverID, isCash, billedAmount } = curr;
 
       // parse the billedAmount
-      const _nBilledAmount =
-        typeof billedAmount == 'string'
-          ? Number.parseFloat(billedAmount.replace(/,/g, ''))
-          : billedAmount;
+      const _nBilledAmount = toDouble(billedAmount);
       acc.billedTotal += _nBilledAmount;
       if (isCash) {
         acc.noOfCashTrips++;
