@@ -22,7 +22,6 @@ async function analysis() {
   };
 
   let driversWithMoreThanOneVehicle = 0;
-  const trips = await getTrips();
   const drivers = await driverReport();
   let mostTripId = "";
   let currentMosttrip = 0;
