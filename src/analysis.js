@@ -1,4 +1,3 @@
-const { getTrips } = require('api');
 const { convertAdditionToDouble } = require('./utils');
 const driverReport = require('./report');
 
@@ -9,7 +8,6 @@ const driverReport = require('./report');
  * @returns {any} Trip data analysis
  */
 async function analysis() {
-  // Your code goes here
   const analysisData = {
     noOfCashTrips: 0,
     noOfNonCashTrips: 0,

@@ -1,20 +1,16 @@
-const { getAllDriversData, convertAdditionToDouble, returnNumber } = require('../src/utils');
-const { getTrips } = require('../src/node_modules/api');
-
-const analysis = require('../src/analysis');
-const driverReport = require('../src/report');
-const report = require('../fixtures/report.json');
+const { convertAdditionToDouble, returnNumber } = require('../src/utils');
 
 describe('convertAdditionToDouble utility', () => {
   test('converts two additions to double data type', () => {
     const firstNumber = "1,222.9800038373";
     const secondNumber = 5000;
-    expect(convertAdditionToDouble(firstNumber,5000)).toEqual(6222.98);
+    expect(convertAdditionToDouble(firstNumber,secondNumber)).toEqual(6222.98);
   });
   test('must be a number', () => {
     const firstNumber = "1,222.9800038373";
     const secondNumber = 5000;
-    expect(convertAdditionToDouble(firstNumber,5000)).not.toBeNaN();
+    expect(convertAdditionToDouble(firstNumber,secondNumber)).not.toBeNaN();
+    
   });
 });
 

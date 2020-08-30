@@ -1,4 +1,4 @@
-const { getDriver, getVehicle } = require('api');
+const { getDriver } = require('api');
 
 const returnNumber = (number) => {
     return typeof(number) == 'string'
