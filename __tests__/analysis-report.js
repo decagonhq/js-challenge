@@ -56,6 +56,8 @@ describe('analysis spec', () => {
 
 describe('driver report', () => {
   test('matches the required data format', async () => {
-    expect(driverReport()).resolves.toEqual(report);
+    const result = await driverReport();
+
+    expect(result).toEqual(report);
   });
 });
