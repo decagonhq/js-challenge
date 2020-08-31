@@ -8,8 +8,4 @@ describe('helper spec', () => {
     return expect(helper.calculateTotalFunction(value)).toEqual(1000);
   });
 
-  test('get Total Drivers', async () => {
-    return expect(helper.getTotalDrivers()).toEqual({});
-  });
-
 });
