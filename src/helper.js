@@ -24,13 +24,12 @@ const helper = {
       try {
         const drivers = await getDriver(driver.driverID);
         const carList = drivers.vehicleID.length > 1;
-        console.log(carList, 'carList, carList');
         if (carList === true) {
           count++;
           return count;
         }
       } catch (error) {
-        return 'Driver not found lol';
+        return 'Driver not found';
       }
     }
   },
