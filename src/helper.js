@@ -25,8 +25,12 @@ const helper = {
     const allDrivers = await Promise.all(
       Object.keys(sorTripsByDriver).map(async (driver) => {
         try {
+          const data = await getDriver(driver);
           return {
-            ...(await getDriver(driver)),
+            ...data,
+            vehicles: await Promise.all(
+              data.vehicleID.map((id) => getVehicle(id)),
+            ),
             id: driver,
           };
         } catch (error) {
@@ -39,19 +43,7 @@ const helper = {
       (value) => value.error !== 'Driver not found',
     );
 
-    const getAllVehicles = await Promise.all(
-      getAllDrivers.map(async (vehicle) => {
-        try {
-          return {
-            ...(await getVehicle(vehicle.vehicleID)),
-            id: vehicle.vehicleID[0],
-          };
-        } catch (error) {
-          return { error: 'vehicle not found' };
-        }
-      }),
-    );
-    return [sorTripsByDriver, getAllDrivers, getAllVehicles];
+    return [sorTripsByDriver, getAllDrivers];
   },
 };
 

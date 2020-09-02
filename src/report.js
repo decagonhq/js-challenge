@@ -10,28 +10,28 @@ const helper = require('./helper');
  */
 async function driverReport() {
   // Your code goes here
-  const [sorTripsByDriver, getAllDrivers, getAllVehicles] = await helper.getReport();
+  const [
+    sorTripsByDriver,
+    getAllDrivers,
+  ] = await helper.getReport();
+
+
 
   const report = getAllDrivers.map((driver) => {
     const tripCashType = (value) =>
-    sorTripsByDriver[driver.id].filter((trips) => trips.isCash === value);
+      sorTripsByDriver[driver.id].filter((trips) => trips.isCash === value);
     return {
       fullName: driver.name,
       id: driver.id,
       phone: driver.phone,
       noOfTrips: sorTripsByDriver[driver.id].length,
       noOfVehicles: driver.vehicleID.length,
-      vehicles: driver.vehicleID.map((id) => {
-        if (id !== getAllVehicles) {
-          return {
-            plate: getAllVehicles.plate,
-            manufacturer: getAllVehicles.manufacturer,
-          };
-        }
-      }),
+      vehicles: driver.vehicles,
       noOfCashTrips: tripCashType(true).length,
       noOfNonCashTrips: tripCashType(false).length,
-      totalAmountEarned: helper.calculateTotalFunction(sorTripsByDriver[driver.id]),
+      totalAmountEarned: helper.calculateTotalFunction(
+        sorTripsByDriver[driver.id],
+      ),
       totalCashAmount: helper.calculateTotalFunction(tripCashType(true)),
       totalNonCashAmount: helper.calculateTotalFunction(tripCashType(false)),
       trips: sorTripsByDriver[driver.id].map((trip) => ({
