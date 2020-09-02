@@ -1,4 +1,4 @@
-const { getTrips, getDriver, getVehicle } = require('api');
+const { getTrips } = require('api');
 const helper = require('./helper');
 
 /**
@@ -10,54 +10,42 @@ const helper = require('./helper');
  */
 async function driverReport() {
   // Your code goes here
-  const getAllTrips = await getTrips();
-  const driverData = async (id) => await getDriver(id);
-  const vehicle = async (data) => {
-    const value = await Promise.all(data.map(async (data) => getVehicle(data)));
-    return value;
-  };
-  try {
-    const test = Object.values(helper.mergeDrivers(getAllTrips)).map(
-      (driver) => {
-        const getTotalData = driver.map(async (details) => {
-          const data = await driverData(details.driverID);
-          const newData = {
-            fullName: data.name,
-            id: details.driverID,
-            phone: data.phone,
-            noOfTrips: driver.length,
-            noOfVehicles: data.vehicleID.length,
-            vehicles: await vehicle(data.vehicleID),
-            noOfCashTrips: helper.cashData(true, driver).length,
-            noOfNonCashTrips: helper.cashData(false, driver).length,
-            totalCashAmount: helper.calculateTotalFunction(
-              cashData(true, driver),
-            ),
-            totalNonCashAmount: helper.calculateTotalFunction(
-              cashData(false, driver),
-            ),
-            trips: driver.map((value) => {
-              return {
-                name: value.user.name,
-                created: value.created,
-                pickup: value.pickup.address,
-                destination: value.destination.address,
-                billed: value.billedAmount,
-                isCash: value.isCash,
-                driverID: value.driverID,
-              };
-            }),
-          };
+  const [sorTripsByDriver, getAllDrivers, getAllVehicles] = await helper.getReport();
 
-          return newData;
-        });
-        return getTotalData;
-      },
-    );
-    return test;
-  } catch (error) {
-    return error;
-  }
+  const report = getAllDrivers.map((driver) => {
+    const tripCashType = (value) =>
+    sorTripsByDriver[driver.id].filter((trips) => trips.isCash === value);
+    return {
+      fullName: driver.name,
+      id: driver.id,
+      phone: driver.phone,
+      noOfTrips: sorTripsByDriver[driver.id].length,
+      noOfVehicles: driver.vehicleID.length,
+      vehicles: driver.vehicleID.map((id) => {
+        if (id !== getAllVehicles) {
+          return {
+            plate: getAllVehicles.plate,
+            manufacturer: getAllVehicles.manufacturer,
+          };
+        }
+      }),
+      noOfCashTrips: tripCashType(true).length,
+      noOfNonCashTrips: tripCashType(false).length,
+      totalAmountEarned: helper.calculateTotalFunction(sorTripsByDriver[driver.id]),
+      totalCashAmount: helper.calculateTotalFunction(tripCashType(true)),
+      totalNonCashAmount: helper.calculateTotalFunction(tripCashType(false)),
+      trips: sorTripsByDriver[driver.id].map((trip) => ({
+        user: trip.user.name,
+        created: trip.created,
+        pickup: trip.pickup.address,
+        destination: trip.destination.address,
+        billed: trip.billedAmount,
+        isCash: trip.isCash,
+        driverID: trip.driverID,
+      })),
+    };
+  });
+  return report;
 }
 
 module.exports = driverReport;

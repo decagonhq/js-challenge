@@ -9,47 +9,48 @@ const helper = require('./helper');
  */
 async function analysis() {
   // Your code goes here
-  const getAllTrips = await getTrips();
+  const [sorTripsByDriver, getAllDrivers] = await helper.getReport();
+  const trips = await getTrips();
+  const cashData = (value) => trips.filter((trips) => trips.isCash === value);
 
-  const noOfCashTrips = helper.cashData(true, getAllTrips);
-  const noOfNonCashTrips = helper.cashData(false, getAllTrips);
-  const billedTotal = helper.calculateTotalFunction(getAllTrips);
-  const cashBilledTotal = helper.calculateTotalFunction(noOfCashTrips);
-  const nonCashBilledTotal = helper.calculateTotalFunction(noOfNonCashTrips);
+  const tripsByDriver = trips
+    .slice()
+    .sort((a, b) => (a.driverID > b.driverID ? 1 : -1))
+    .pop();
+  const mostTripsByDriver = await getDriver(tripsByDriver.driverID);
 
-  const [driverId, { name, email, phone }] = await helper.highestTripDriver(
-    getAllTrips,
-    getDriver,
-  );
-  const driverTotals = getAllTrips.filter((trip) => trip.driverID === driverId);
-  const highestEarningDriver = await helper.earningDriver(
-    getAllTrips,
-    getDriver,
-  );
+  const highestEarning = Object.values(sorTripsByDriver)
+    .map((earning) => ({
+      id: earning.map((bill) => bill.driverID)[0],
+      billedAmount: helper.calculateTotalFunction(earning.map((bill) => bill)),
+    }))
+    .sort((a, b) => b.billedAmount - a.billedAmount)[0];
+  const highestEarningDriver = await getDriver(highestEarning.id);
 
   const newObject = {
-    noOfCashTrips: noOfCashTrips.length,
-    noOfNonCashTrips: noOfNonCashTrips.length,
-    billedTotal,
-    cashBilledTotal,
-    nonCashBilledTotal,
-    noOfDriversWithMoreThanOneVehicle: await helper.getTotalDrivers(
-      getAllTrips,
-      getDriver,
-    ),
+    noOfCashTrips: cashData(true).length,
+    noOfNonCashTrips: cashData(false).length,
+    billedTotal: helper.calculateTotalFunction(trips),
+    cashBilledTotal: helper.calculateTotalFunction(cashData(true)),
+    nonCashBilledTotal: helper.calculateTotalFunction(cashData(false)),
+    noOfDriversWithMoreThanOneVehicle: getAllDrivers.filter(
+      (getAllDriver) => getAllDriver.vehicleID.length > 1,
+    ).length,
     mostTripsByDriver: {
-      name,
-      email,
-      phone,
-      noOfTrips: driverTotals.length,
-      totalAmountEarned: helper.calculateTotalFunction(driverTotals),
+      name: mostTripsByDriver.name,
+      email: mostTripsByDriver.email,
+      phone: mostTripsByDriver.phone,
+      noOfTrips: sorTripsByDriver[tripsByDriver.driverID].length,
+      totalAmountEarned: helper.calculateTotalFunction(
+        sorTripsByDriver[tripsByDriver.driverID],
+      ),
     },
     highestEarningDriver: {
       name: highestEarningDriver.name,
       email: highestEarningDriver.email,
       phone: highestEarningDriver.phone,
-      noOfTrips: highestEarningDriver.noOfTrips,
-      totalAmountEarned: highestEarningDriver.billedAmount,
+      noOfTrips: sorTripsByDriver[highestEarning.id].length,
+      totalAmountEarned: highestEarning.billedAmount,
     },
   };
   return newObject;
