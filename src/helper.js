@@ -34,10 +34,10 @@ const helper = {
             id: driver,
           };
         } catch (error) {
-          return { 
+          return {
             id: driver,
             vehicles: [],
-
+            vehicleID: 0,
           };
         }
       }),

@@ -53,6 +53,8 @@ async function analysis() {
       totalAmountEarned: highestEarning.billedAmount,
     },
   };
+
+
   return newObject;
 }
 

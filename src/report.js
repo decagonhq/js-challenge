@@ -41,7 +41,7 @@ async function driverReport() {
     };
   });
 
-  console.log(report, 'allDrivers');
+
   return report;
 }
 
