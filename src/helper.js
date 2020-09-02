@@ -22,7 +22,7 @@ const helper = {
       return acc;
     }, {});
 
-    const allDrivers = await Promise.all(
+    const getAllDrivers = await Promise.all(
       Object.keys(sorTripsByDriver).map(async (driver) => {
         try {
           const data = await getDriver(driver);
@@ -34,15 +34,14 @@ const helper = {
             id: driver,
           };
         } catch (error) {
-          return { error: 'Driver not found' };
+          return { 
+            id: driver,
+            vehicles: [],
+
+          };
         }
       }),
     );
-
-    const getAllDrivers = allDrivers.filter(
-      (value) => value.error !== 'Driver not found',
-    );
-
     return [sorTripsByDriver, getAllDrivers];
   },
 };

@@ -10,12 +10,7 @@ const helper = require('./helper');
  */
 async function driverReport() {
   // Your code goes here
-  const [
-    sorTripsByDriver,
-    getAllDrivers,
-  ] = await helper.getReport();
-
-
+  const [sorTripsByDriver, getAllDrivers] = await helper.getReport();
 
   const report = getAllDrivers.map((driver) => {
     const tripCashType = (value) =>
@@ -25,7 +20,7 @@ async function driverReport() {
       id: driver.id,
       phone: driver.phone,
       noOfTrips: sorTripsByDriver[driver.id].length,
-      noOfVehicles: driver.vehicleID.length,
+      noOfVehicles: driver.vehicleID ? driver.vehicleID.length : 0,
       vehicles: driver.vehicles,
       noOfCashTrips: tripCashType(true).length,
       noOfNonCashTrips: tripCashType(false).length,
@@ -45,6 +40,8 @@ async function driverReport() {
       })),
     };
   });
+
+  console.log(report, 'allDrivers');
   return report;
 }
 
